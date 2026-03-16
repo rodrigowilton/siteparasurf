@@ -1,0 +1,12 @@
+{
+  "name": "parasurf-landing",
+  "version": "1.0.0",
+  "description": "Instituto ParaSurf — Landing Page",
+  "scripts": {
+    "start": "serve -s . -l 3016",
+    "dev": "serve -s . -l 3016"
+  },
+  "dependencies": {
+    "serve": "^14.2.3"
+  }
+}

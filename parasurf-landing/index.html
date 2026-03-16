@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Instituto ParaSurf — Surf adaptado para pessoas com deficiência. Vila Velha, ES. Transformando vidas através do oceano." />
+  <meta property="og:title" content="Instituto ParaSurf" />
+  <meta property="og:description" content="Surf adaptado para todos. Vila Velha, ES." />
+  <meta name="theme-color" content="#020d1a" />
+  <title>Instituto ParaSurf — Surf Adaptado</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Teko:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =============================================
+       RESET & ROOT
+       ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #020d1a;
+      --deep:      #041525;
+      --navy:      #062040;
+      --ocean:     #0a3d6b;
+      --mid:       #0e6b9e;
+      --bright:    #00b4d8;
+      --foam:      #90e0ef;
+      --white:     #f0faff;
+      --gold:      #f4a846;
+      --coral:     #ff6b6b;
+      --green:     #06d6a0;
+      --font-hero: 'Teko', sans-serif;
+      --font-disp: 'Black Han Sans', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--ink);
+      color: var(--white);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* =============================================
+       CUSTOM CURSOR
+       ============================================= */
+    .cursor {
+      position: fixed;
+      width: 12px; height: 12px;
+      background: var(--bright);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 40px; height: 40px;
+      border: 1.5px solid rgba(0,180,216,0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.3s, height 0.3s;
+    }
+    body:hover .cursor { opacity: 1; }
+
+    /* =============================================
+       CANVAS WAVES BACKGROUND
+       ============================================= */
+    #wave-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    /* =============================================
+       NOISE TEXTURE OVERLAY
+       ============================================= */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.6;
+    }
+
+    /* =============================================
+       LAYOUT WRAPPER
+       ============================================= */
+    .site { position: relative; z-index: 2; }
+
+    /* =============================================
+       NAV
+       ============================================= */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      transition: background 0.4s, padding 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(2,13,26,0.88);
+      backdrop-filter: blur(16px);
+      padding: 14px 48px;
+      border-bottom: 1px solid rgba(0,180,216,0.1);
+    }
+    .nav-logo {
+      font-family: var(--font-hero);
+      font-size: 28px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo span { color: var(--bright); }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(240,250,255,0.65);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0; right: 0;
+      height: 1px;
+      background: var(--bright);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--bright), #0077b6);
+      color: white !important;
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-weight: 500 !important;
+      letter-spacing: 1px;
+      box-shadow: 0 0 24px rgba(0,180,216,0.35);
+      transition: box-shadow 0.3s, transform 0.2s !important;
+    }
+    .nav-cta::after { display: none !important; }
+    .nav-cta:hover { box-shadow: 0 0 40px rgba(0,180,216,0.55); transform: translateY(-1px); }
+
+    @media(max-width:768px){
+      nav { padding: 18px 24px; }
+      nav.scrolled { padding: 12px 24px; }
+      .nav-links { display: none; }
+    }
+
+    /* =============================================
+       HERO
+       ============================================= */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--bright);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-eyebrow::before, .hero-eyebrow::after {
+      content: '';
+      display: block;
+      width: 40px; height: 1px;
+      background: var(--bright);
+      opacity: 0.5;
+    }
+
+    .hero-title {
+      font-family: var(--font-hero);
+      font-size: clamp(72px, 14vw, 180px);
+      line-height: 0.88;
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: var(--white);
+      opacity: 0;
+      animation: fadeUp 0.9s 0.35s forwards;
+    }
+    .hero-title .accent { 
+      color: transparent;
+      -webkit-text-stroke: 2px var(--bright);
+      display: block;
+    }
+    .hero-title .gold { color: var(--gold); }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 22px);
+      font-weight: 300;
+      font-style: italic;
+      color: rgba(240,250,255,0.65);
+      margin-top: 28px;
+      max-width: 540px;
+      line-height: 1.6;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.65s forwards;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--bright) 0%, #0077b6 100%);
+      color: white;
+      padding: 16px 40px;
+      border-radius: 50px;
+      font-family: var(--font-hero);
+      font-size: 20px;
+      letter-spacing: 2px;
+      text-decoration: none;
+      box-shadow: 0 8px 40px rgba(0,180,216,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 50px rgba(0,180,216,0.55); }
+
+    .btn-outline {
+      border: 1.5px solid rgba(0,180,216,0.45);
+      color: var(--foam);
+      padding: 16px 40px;
+      border-radius: 50px;
+      font-family: var(--font-hero);
+      font-size: 20px;
+      letter-spacing: 2px;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    .btn-outline:hover { border-color: var(--bright); background: rgba(0,180,216,0.08); transform: translateY(-3px); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeIn 1s 1.2s forwards;
+    }
+    .hero-scroll span { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+    .scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--bright), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+    /* =============================================
+       STATS STRIP
+       ============================================= */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(0,180,216,0.1);
+      border-top: 1px solid rgba(0,180,216,0.15);
+      border-bottom: 1px solid rgba(0,180,216,0.15);
+    }
+    .stat-item {
+      background: rgba(2,13,26,0.7);
+      padding: 40px 24px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: background 0.3s;
+    }
+    .stat-item:hover { background: rgba(10,61,107,0.5); }
+    .stat-num {
+      font-family: var(--font-hero);
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 700;
+      color: var(--bright);
+      line-height: 1;
+      display: block;
+    }
+    .stat-label {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(240,250,255,0.5);
+      margin-top: 6px;
+      display: block;
+    }
+
+    @media(max-width:640px){
+      .stats-strip { grid-template-columns: repeat(2,1fr); }
+    }
+
+    /* =============================================
+       SECTIONS COMMON
+       ============================================= */
+    section { padding: 120px 48px; max-width: 1200px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--bright);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 28px; height: 1px;
+      background: var(--bright);
+    }
+
+    .section-title {
+      font-family: var(--font-hero);
+      font-size: clamp(42px, 6vw, 80px);
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.5px;
+      margin-bottom: 24px;
+    }
+    .section-title .hl { color: var(--bright); }
+
+    .section-body {
+      font-size: 17px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: rgba(240,250,255,0.65);
+      max-width: 540px;
+    }
+
+    /* =============================================
+       ABOUT SECTION
+       ============================================= */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .about-visual {
+      position: relative;
+    }
+    .about-card {
+      background: linear-gradient(135deg, rgba(10,61,107,0.7), rgba(6,32,64,0.9));
+      border: 1px solid rgba(0,180,216,0.2);
+      border-radius: 24px;
+      padding: 40px;
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+    .about-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(0,180,216,0.2), transparent 70%);
+      border-radius: 50%;
+    }
+    .about-card-icon { font-size: 56px; margin-bottom: 20px; display: block; }
+    .about-card h3 {
+      font-family: var(--font-hero);
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: var(--foam);
+    }
+    .about-card p { font-size: 15px; font-weight: 300; line-height: 1.7; color: rgba(240,250,255,0.6); }
+    .about-card-accent {
+      position: absolute;
+      bottom: 20px; right: 24px;
+      font-family: var(--font-disp);
+      font-size: 80px;
+      color: rgba(0,180,216,0.06);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .about-stack { display: flex; flex-direction: column; gap: 20px; }
+
+    @media(max-width:900px){
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      section { padding: 80px 24px; }
+    }
+
+    /* =============================================
+       FEATURES
+       ============================================= */
+    .features-wrap { padding: 0 48px 120px; max-width: 1200px; margin: 0 auto; }
+
+    .features-title {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .features-title .section-label { justify-content: center; }
+    .features-title .section-title { text-align: center; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: rgba(6,32,64,0.5);
+      border: 1px solid rgba(0,180,216,0.12);
+      border-radius: 20px;
+      padding: 36px 28px;
+      backdrop-filter: blur(12px);
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--bright), transparent);
+      transform: scaleX(0);
+      transition: transform 0.4s;
+    }
+    .feature-card:hover { transform: translateY(-6px); border-color: rgba(0,180,216,0.3); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .feature-card:hover::after { transform: scaleX(1); }
+    .feature-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(0,180,216,0.2), rgba(0,119,182,0.15));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(0,180,216,0.2);
+    }
+    .feature-card h3 {
+      font-family: var(--font-hero);
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: var(--foam);
+    }
+    .feature-card p { font-size: 14px; font-weight: 300; line-height: 1.7; color: rgba(240,250,255,0.55); }
+
+    @media(max-width:900px){
+      .features-grid { grid-template-columns: 1fr; }
+      .features-wrap { padding: 0 24px 80px; }
+    }
+
+    /* =============================================
+       PROFILES SECTION
+       ============================================= */
+    .profiles-wrap {
+      background: linear-gradient(180deg, transparent 0%, rgba(6,32,64,0.4) 30%, rgba(6,32,64,0.4) 70%, transparent 100%);
+      padding: 120px 0;
+    }
+    .profiles-inner { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+    .profiles-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 56px;
+    }
+    .profile-card {
+      border-radius: 20px;
+      padding: 36px 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-card:hover { transform: translateY(-8px) scale(1.02); }
+    .profile-card.pc-professor { background: linear-gradient(160deg, rgba(244,168,70,0.12), rgba(244,168,70,0.04)); border-color: rgba(244,168,70,0.2); }
+    .profile-card.pc-aluno    { background: linear-gradient(160deg, rgba(0,180,216,0.12), rgba(0,180,216,0.04)); border-color: rgba(0,180,216,0.2); }
+    .profile-card.pc-estagiario { background: linear-gradient(160deg, rgba(144,224,239,0.12), rgba(144,224,239,0.04)); border-color: rgba(144,224,239,0.2); }
+    .profile-card.pc-voluntario { background: linear-gradient(160deg, rgba(6,214,160,0.12), rgba(6,214,160,0.04)); border-color: rgba(6,214,160,0.2); }
+    .profile-card:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .profile-emoji-big { font-size: 48px; display: block; margin-bottom: 14px; }
+    .profile-card h3 {
+      font-family: var(--font-hero);
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+    .profile-card.pc-professor h3 { color: var(--gold); }
+    .profile-card.pc-aluno h3    { color: var(--bright); }
+    .profile-card.pc-estagiario h3 { color: var(--foam); }
+    .profile-card.pc-voluntario h3 { color: var(--green); }
+    .profile-card p { font-size: 13px; font-weight: 300; line-height: 1.6; color: rgba(240,250,255,0.55); margin-bottom: 20px; }
+    .profile-pills { display: flex; flex-direction: column; gap: 6px; }
+    .pill {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      color: rgba(240,250,255,0.7);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media(max-width:900px){
+      .profiles-grid { grid-template-columns: 1fr 1fr; }
+      .profiles-inner { padding: 0 24px; }
+    }
+    @media(max-width:540px){
+      .profiles-grid { grid-template-columns: 1fr; }
+    }
+
+    /* =============================================
+       TECH SECTION
+       ============================================= */
+    .tech-section { padding: 120px 48px; max-width: 1200px; margin: 0 auto; }
+    .tech-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .tech-stack-list { margin-top: 36px; display: flex; flex-direction: column; gap: 12px; }
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      background: rgba(6,32,64,0.5);
+      border: 1px solid rgba(0,180,216,0.1);
+      border-radius: 12px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .tech-item:hover { border-color: rgba(0,180,216,0.3); background: rgba(10,61,107,0.35); }
+    .tech-badge {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: rgba(0,180,216,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .tech-info h4 { font-size: 15px; font-weight: 500; color: var(--foam); }
+    .tech-info p  { font-size: 12px; color: rgba(240,250,255,0.45); margin-top: 2px; }
+
+    .deploy-card {
+      background: linear-gradient(135deg, rgba(6,32,64,0.8), rgba(2,13,26,0.9));
+      border: 1px solid rgba(0,180,216,0.2);
+      border-radius: 20px;
+      padding: 36px;
+      backdrop-filter: blur(20px);
+    }
+    .deploy-card h3 {
+      font-family: var(--font-hero);
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: var(--bright);
+    }
+    .code-block {
+      background: rgba(2,13,26,0.8);
+      border: 1px solid rgba(0,180,216,0.15);
+      border-radius: 12px;
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #a8dadc;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .code-block .c-comment { color: rgba(168,218,220,0.4); }
+    .code-block .c-cmd     { color: var(--bright); }
+    .code-block .c-string  { color: var(--gold); }
+    .code-block .c-flag    { color: var(--green); }
+
+    @media(max-width:900px){
+      .tech-grid { grid-template-columns: 1fr; gap: 40px; }
+      .tech-section { padding: 80px 24px; }
+    }
+
+    /* =============================================
+       CTA SECTION
+       ============================================= */
+    .cta-section {
+      text-align: center;
+      padding: 120px 48px;
+      position: relative;
+    }
+    .cta-glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(0,180,216,0.12), transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section .section-title { font-size: clamp(48px,8vw,96px); text-align: center; }
+    .cta-section .section-body  { margin: 20px auto 48px; text-align: center; }
+    .cta-contact {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 18px;
+      color: rgba(240,250,255,0.5);
+    }
+    .cta-contact strong { color: var(--foam); font-weight: 500; }
+    .cta-contact a { color: var(--bright); text-decoration: none; font-weight: 500; }
+    .cta-contact a:hover { text-decoration: underline; }
+
+    /* =============================================
+       FOOTER
+       ============================================= */
+    footer {
+      border-top: 1px solid rgba(0,180,216,0.1);
+      padding: 40px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-brand {
+      font-family: var(--font-hero);
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: rgba(240,250,255,0.3);
+    }
+    .footer-brand span { color: var(--bright); }
+    .footer-info { font-size: 13px; color: rgba(240,250,255,0.3); text-align: right; }
+    .footer-info a { color: var(--bright); text-decoration: none; }
+
+    @media(max-width:640px){
+      footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+      .footer-info { text-align: left; }
+      .cta-section { padding: 80px 24px; }
+    }
+
+    /* =============================================
+       KEYFRAMES
+       ============================================= */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* =============================================
+       SCROLL REVEAL
+       ============================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+  </style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Animated Wave Canvas -->
+<canvas id="wave-canvas"></canvas>
+
+<div class="site">
+
+  <!-- ============ NAV ============ -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">🏄 PARA<span>SURF</span></a>
+    <ul class="nav-links">
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#perfis">Perfis</a></li>
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#tecnologia">Tecnologia</a></li>
+      <li><a href="#contato" class="nav-cta">Acessar App</a></li>
+    </ul>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <div class="hero">
+    <div class="hero-eyebrow">Instituto ParaSurf · Vila Velha, ES</div>
+    <h1 class="hero-title">
+      SURF<br>
+      <span class="accent">PARA</span>
+      <span class="gold">TODOS</span>
+    </h1>
+    <p class="hero-sub">
+      Sistema de gestão de presenças para surf adaptado. Conectando professores, alunos, estagiários e voluntários em uma plataforma simples e poderosa.
+    </p>
+    <div class="hero-actions">
+      <a href="#contato" class="btn-primary">🌊 Acessar o App</a>
+      <a href="#sobre" class="btn-outline">Saiba mais</a>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+  </div>
+
+  <!-- ============ STATS ============ -->
+  <div class="stats-strip">
+    <div class="stat-item reveal">
+      <span class="stat-num" data-target="4">0</span>
+      <span class="stat-label">Perfis de Acesso</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+      <span class="stat-num" data-target="3">0</span>
+      <span class="stat-label">Telas por Perfil</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <span class="stat-num" data-target="100">0</span>
+      <span class="stat-label">% Web & Mobile</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <span class="stat-num">24/7</span>
+      <span class="stat-label">Disponibilidade</span>
+    </div>
+  </div>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="sobre">
+    <div class="about-grid">
+      <div>
+        <div class="section-label reveal">Nossa missão</div>
+        <h2 class="section-title reveal reveal-delay-1">
+          O oceano é<br>de <span class="hl">todos.</span>
+        </h2>
+        <p class="section-body reveal reveal-delay-2">
+          O Instituto ParaSurf acredita que o surf adaptado tem o poder de transformar vidas. Nossa plataforma digital nasceu para simplificar a logística das aulas — permitindo que o foco permaneça onde ele deve estar: no mar.
+        </p>
+        <p class="section-body reveal reveal-delay-3" style="margin-top:16px;">
+          Professores montam suas equipes, alunos confirmam presença, e toda a organização acontece em segundos — em qualquer dispositivo, direto do navegador.
+        </p>
+      </div>
+      <div class="about-visual">
+        <div class="about-stack">
+          <div class="about-card reveal reveal-delay-1">
+            <span class="about-card-icon">🎯</span>
+            <h3>Simples e Direto</h3>
+            <p>Sem complicações. Login em segundos, confirmação em um toque. Feito para quem está na praia, não na mesa.</p>
+            <div class="about-card-accent">01</div>
+          </div>
+          <div class="about-card reveal reveal-delay-2">
+            <span class="about-card-icon">📡</span>
+            <h3>Tempo Real</h3>
+            <p>O professor vê as confirmações conforme chegam. Equipe completa ou incompleta — sempre atualizado.</p>
+            <div class="about-card-accent">02</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <div class="features-wrap" id="funcionalidades">
+    <div class="features-title">
+      <div class="section-label reveal">O que o app faz</div>
+      <h2 class="section-title reveal reveal-delay-1">Funciona<br><span class="hl">de verdade.</span></h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon">📢</div>
+        <h3>Avisos em Tempo Real</h3>
+        <p>O professor envia comunicados para alunos, estagiários e voluntários. Mensagens urgentes se destacam visualmente.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">✅</div>
+        <h3>Confirmação de Presença</h3>
+        <p>Cada participante confirma ou cancela com um toque. O professor vê quem vai e quem não vai antes de sair de casa.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">👥</div>
+        <h3>Gestão de Equipe</h3>
+        <p>Cadastro completo de alunos, estagiários e voluntários. O professor monta sua equipe e acompanha tudo em um painel.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon">📅</div>
+        <h3>Agendamento de Aulas</h3>
+        <p>Crie aulas com data, horário e local. As confirmações são vinculadas à próxima aula automaticamente.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">📱</div>
+        <h3>100% Mobile-First</h3>
+        <p>Desenvolvido para funcionar perfeitamente em celular. Interface tátil, botões grandes, navegação intuitiva.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">🔒</div>
+        <h3>Perfis com Permissões</h3>
+        <p>Cada perfil vê e acessa apenas o que precisa. Alunos não editam dados de outros. Professor controla tudo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PROFILES ============ -->
+  <div class="profiles-wrap" id="perfis">
+    <div class="profiles-inner">
+      <div class="section-label reveal">Quem usa</div>
+      <h2 class="section-title reveal reveal-delay-1">4 perfis.<br><span class="hl">1 equipe.</span></h2>
+      <div class="profiles-grid">
+        <div class="profile-card pc-professor reveal">
+          <span class="profile-emoji-big">🎓</span>
+          <h3>Professor</h3>
+          <p>Comanda a equipe, cria aulas e avisos, acompanha todas as confirmações.</p>
+          <div class="profile-pills">
+            <div class="pill">📊 Painel completo</div>
+            <div class="pill">📢 Criar avisos</div>
+            <div class="pill">📅 Agendar aulas</div>
+            <div class="pill">👥 Gerir cadastros</div>
+          </div>
+        </div>
+        <div class="profile-card pc-aluno reveal reveal-delay-1">
+          <span class="profile-emoji-big">🏄</span>
+          <h3>Aluno</h3>
+          <p>Recebe avisos, confirma presença e acompanha a próxima aula.</p>
+          <div class="profile-pills">
+            <div class="pill">✅ Confirmar presença</div>
+            <div class="pill">📢 Ver avisos</div>
+            <div class="pill">📋 Ver turma</div>
+            <div class="pill">🗑 Excluir resposta</div>
+          </div>
+        </div>
+        <div class="profile-card pc-estagiario reveal reveal-delay-2">
+          <span class="profile-emoji-big">📋</span>
+          <h3>Estagiário</h3>
+          <p>Membro da equipe de trabalho, confirma presença na aula.</p>
+          <div class="profile-pills">
+            <div class="pill">✅ Confirmar presença</div>
+            <div class="pill">📢 Ver avisos</div>
+            <div class="pill">👥 Ver equipe</div>
+            <div class="pill">📝 Auto-cadastro</div>
+          </div>
+        </div>
+        <div class="profile-card pc-voluntario reveal reveal-delay-3">
+          <span class="profile-emoji-big">🤝</span>
+          <h3>Voluntário</h3>
+          <p>Apoia as aulas e informa disponibilidade com antecedência.</p>
+          <div class="profile-pills">
+            <div class="pill">✅ Confirmar presença</div>
+            <div class="pill">📢 Ver avisos</div>
+            <div class="pill">👥 Ver equipe</div>
+            <div class="pill">📝 Auto-cadastro</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TECH ============ -->
+  <div class="tech-section" id="tecnologia">
+    <div class="tech-grid">
+      <div>
+        <div class="section-label reveal">Debaixo do capô</div>
+        <h2 class="section-title reveal reveal-delay-1">Stack<br><span class="hl">moderna.</span></h2>
+        <p class="section-body reveal reveal-delay-2">Construído com tecnologias sólidas para rodar em qualquer servidor Linux, do VPS ao cloud.</p>
+        <div class="tech-stack-list">
+          <div class="tech-item reveal reveal-delay-1">
+            <div class="tech-badge">⚡</div>
+            <div class="tech-info"><h4>TypeScript + Vite</h4><p>Frontend rápido, tipado e sem frameworks desnecessários</p></div>
+          </div>
+          <div class="tech-item reveal reveal-delay-2">
+            <div class="tech-badge">🟢</div>
+            <div class="tech-info"><h4>PM2</h4><p>Process manager — reinicia automático, logs, cluster mode</p></div>
+          </div>
+          <div class="tech-item reveal reveal-delay-3">
+            <div class="tech-badge">🌐</div>
+            <div class="tech-info"><h4>Nginx</h4><p>Proxy reverso, cache de assets, suporte a HTTPS/certbot</p></div>
+          </div>
+          <div class="tech-item reveal reveal-delay-4">
+            <div class="tech-badge">📱</div>
+            <div class="tech-info"><h4>Capacitor-Ready</h4><p>Estrutura pronta para empacotar em iOS e Android</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="deploy-card">
+          <h3>⚙️ Deploy em Minutos</h3>
+          <div class="code-block">
+<span class="c-comment"># 1. Instalar e fazer build</span>
+<span class="c-cmd">npm</span> install
+<span class="c-cmd">npm</span> run build
+
+<span class="c-comment"># 2. Rodar com PM2</span>
+<span class="c-cmd">pm2</span> start ecosystem.config.js
+<span class="c-cmd">pm2</span> save <span class="c-flag">&amp;&amp;</span> pm2 startup
+
+<span class="c-comment"># 3. Nginx → porta 3016</span>
+<span class="c-cmd">sudo</span> cp nginx/parasurf-landing.conf \
+  /etc/nginx/sites-available/
+<span class="c-cmd">sudo</span> nginx <span class="c-flag">-t</span> <span class="c-flag">&amp;&amp;</span> systemctl reload nginx
+          </div>
+          <div style="font-size:13px;color:rgba(240,250,255,0.45);line-height:1.7;">
+            <strong style="color:var(--bright);">Domínio:</strong> parasurf.streetonline.com.br<br>
+            <strong style="color:var(--bright);">Porta interna:</strong> 3016<br>
+            <strong style="color:var(--bright);">App:</strong> porta 3015
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CTA ============ -->
+  <div class="cta-section" id="contato">
+    <div class="cta-glow"></div>
+    <div class="section-label reveal" style="justify-content:center;">Vamos juntos</div>
+    <h2 class="section-title reveal reveal-delay-1">
+      O mar<br>
+      <span class="hl">te espera.</span>
+    </h2>
+    <p class="section-body reveal reveal-delay-2">
+      Acesse o sistema de confirmações do Instituto ParaSurf e faça parte de uma equipe que transforma vidas através do oceano.
+    </p>
+    <div class="reveal reveal-delay-3">
+      <a href="http://parasurf.streetonline.com.br:3015" class="btn-primary" style="font-size:22px;padding:20px 56px;">
+        🏄 Entrar no App
+      </a>
+    </div>
+    <div class="cta-contact reveal reveal-delay-4">
+      <span>📞</span>
+      <strong>Suporte:</strong>
+      <a href="tel:+5527988668868">+55 27 98866-8868</a>
+      &nbsp;·&nbsp;
+      Vila Velha, ES
+    </div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="footer-brand">PARA<span>SURF</span> · INSTITUTO</div>
+    <div class="footer-info">
+      Vila Velha, ES · <a href="tel:+5527988668868">+55 27 98866-8868</a><br>
+      <span style="font-size:11px;opacity:0.6;">parasurf.streetonline.com.br</span>
+    </div>
+  </footer>
+
+</div><!-- end .site -->
+
+<script>
+// =============================================
+// Wave Canvas Animation
+// =============================================
+(function() {
+  const canvas = document.getElementById('wave-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, t = 0;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const waves = [
+    { amp: 60, freq: 0.008, speed: 0.012, y: 0.55, alpha: 0.6, color: '#0e6b9e' },
+    { amp: 40, freq: 0.012, speed: 0.018, y: 0.62, alpha: 0.45, color: '#00b4d8' },
+    { amp: 28, freq: 0.018, speed: 0.025, y: 0.70, alpha: 0.3, color: '#90e0ef' },
+    { amp: 18, freq: 0.025, speed: 0.035, y: 0.78, alpha: 0.2, color: '#caf0f8' },
+  ];
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    waves.forEach((w, i) => {
+      ctx.beginPath();
+      ctx.moveTo(0, H);
+      for (let x = 0; x <= W; x += 4) {
+        const y = w.y * H + Math.sin(x * w.freq + t * w.speed * 60 + i) * w.amp
+                          + Math.sin(x * w.freq * 1.7 + t * w.speed * 40 + i * 2) * (w.amp * 0.4);
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, w.y * H, 0, H);
+      grad.addColorStop(0, w.color + Math.round(w.alpha * 255).toString(16).padStart(2,'0'));
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    });
+    t += 0.016;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// =============================================
+// Custom Cursor
+// =============================================
+(function() {
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  document.querySelectorAll('a,button,.feature-card,.profile-card,.stat-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { cur.style.width='20px'; cur.style.height='20px'; ring.style.width='60px'; ring.style.height='60px'; });
+    el.addEventListener('mouseleave', () => { cur.style.width='12px'; cur.style.height='12px'; ring.style.width='40px'; ring.style.height='40px'; });
+  });
+  function loop() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// =============================================
+// Navbar scroll effect
+// =============================================
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// =============================================
+// Scroll Reveal
+// =============================================
+(function() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+
+// =============================================
+// Counter Animation
+// =============================================
+(function() {
+  const nums = document.querySelectorAll('[data-target]');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const target = +el.dataset.target;
+        let start = 0;
+        const step = target / 40;
+        const timer = setInterval(() => {
+          start += step;
+          if (start >= target) { el.textContent = target + (target === 100 ? '' : ''); clearInterval(timer); }
+          else el.textContent = Math.floor(start);
+        }, 30);
+        obs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  nums.forEach(n => obs.observe(n));
+})();
+</script>
+
+</body>
+</html>
